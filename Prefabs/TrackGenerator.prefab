@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 6255679559766606523}
   - component: {fileID: 5181591524911005938}
   - component: {fileID: 3956100856082084601}
-  - component: {fileID: 3224157054538395127}
   m_Layer: 6
   m_Name: TrackGenerator
   m_TagString: Untagged
@@ -106,7 +105,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrackGenerator
   controlPoints: []
   segmentsPerPoint: 20
-  roadWidth: 6
+  roadWidth: 15
 --- !u!114 &3956100856082084601
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -120,25 +119,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrackScroller
   scrollSpeed: 5
---- !u!64 &3224157054538395127
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5571707517626650711}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 0}
