@@ -4,30 +4,34 @@ using System.Collections.Generic;
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class TrackGenerator : MonoBehaviour
 {
-    public List<Vector3> controlPoints = new List<Vector3>(); 
+    public List<Vector3> controlPoints = new List<Vector3>();
     public int segmentsPerPoint = 20; // Ne kadar yüksekse o kadar pürüzsüz (Smooth)
     public float roadWidth = 6f;
 
     void Start()
     {
         controlPoints.Clear();
+
         // 1. Nokta: Başlangıç (Sıfır noktası)
         controlPoints.Add(new Vector3(0, 0, 0));
-        // 2. Nokta: Başlangıcı düz tutmak için ileri bir nokta (Burada yol düz kalır)
-        controlPoints.Add(new Vector3(0, 0, 10)); 
-        // 3. Nokta: Artık kıvrım başlayabilir
+        // 2. Nokta: Başlangıcı düz tutmak için ileri bir nokta
+        controlPoints.Add(new Vector3(0, 0, 10));
+        // 3+ Noktalar: Kıvrım başlayabilir
         controlPoints.Add(new Vector3(5, 10, 30));
         controlPoints.Add(new Vector3(-5, -5, 50));
         controlPoints.Add(new Vector3(0, 0, 70));
-        
+
         GenerateTrack();
     }
 
     void GenerateTrack()
     {
         Mesh mesh = new Mesh();
+        mesh.name = "ProceduralTrack";
+
         List<Vector3> vertices = new List<Vector3>();
-        List<Vector2> uvs = new List<Vector2>(); // Şeritler için UV şart
+        List<Vector2> uvs = new List<Vector2>();
+        List<Vector2> uv2s = new List<Vector2>(); // <-- UV2: düz hedef X burada
         List<int> triangles = new List<int>();
 
         // Pürüzsüz yolu hesapla
@@ -41,49 +45,71 @@ public class TrackGenerator : MonoBehaviour
             }
         }
 
-        // Mesh Oluşturma
+        // Mesh oluşturma
         for (int i = 0; i < smoothPoints.Count; i++)
         {
-            Vector3 forward = (i < smoothPoints.Count - 1) ? (smoothPoints[i + 1] - smoothPoints[i]).normalized : (smoothPoints[i] - smoothPoints[i - 1]).normalized;
-            Vector3 normal = Vector3.up; 
+            Vector3 forward =
+                (i < smoothPoints.Count - 1)
+                ? (smoothPoints[i + 1] - smoothPoints[i]).normalized
+                : (smoothPoints[i] - smoothPoints[i - 1]).normalized;
+
+            // Diklik durumuna göre normal seç (sonra right hesapla)
+            Vector3 normal = Vector3.up;
+            if (Mathf.Abs(forward.y) > 0.9f)
+                normal = Vector3.forward;
+
             Vector3 right = Vector3.Cross(normal, forward).normalized;
-            // Eğer yol çok dikleşirse yamulmaması için:
-            if (forward.y > 0.9f || forward.y < -0.9f) normal = Vector3.forward;
 
-            // Vertexleri ekle (Sağ ve Sol kenar)
-            vertices.Add(smoothPoints[i] - right * (roadWidth / 2f));
-            vertices.Add(smoothPoints[i] + right * (roadWidth / 2f));
+            // Sağ / sol kenar vertexleri
+            Vector3 leftV = smoothPoints[i] - right * (roadWidth / 2f);
+            Vector3 rightV = smoothPoints[i] + right * (roadWidth / 2f);
 
-            // UV'leri ekle (Texture'ın nasıl görüneceği)
-            // x: 0 sol, 1 sağ kenar | y: i ise yol boyunca uzanma
-            uvs.Add(new Vector2(0, i * 0.5f)); 
+            vertices.Add(leftV);
+            vertices.Add(rightV);
+
+            // UV0 (texture)
+            uvs.Add(new Vector2(0, i * 0.5f));
             uvs.Add(new Vector2(1, i * 0.5f));
 
+            // UV2.x = düz hedef X (object space)
+            // Shader yakınlaşınca vertex x'i buna doğru çekecek.
+            uv2s.Add(new Vector2(-roadWidth / 2f, 0f));
+            uv2s.Add(new Vector2(+roadWidth / 2f, 0f));
+
+            // Triangles
             if (i < smoothPoints.Count - 1)
             {
                 int root = i * 2;
-                triangles.Add(root); triangles.Add(root + 2); triangles.Add(root + 1);
-                triangles.Add(root + 1); triangles.Add(root + 2); triangles.Add(root + 3);
+
+                triangles.Add(root);
+                triangles.Add(root + 2);
+                triangles.Add(root + 1);
+
+                triangles.Add(root + 1);
+                triangles.Add(root + 2);
+                triangles.Add(root + 3);
             }
         }
 
-        mesh.vertices = vertices.ToArray();
-        mesh.uv = uvs.ToArray();
-        mesh.triangles = triangles.ToArray();
+        mesh.SetVertices(vertices);
+        mesh.SetUVs(0, uvs);
+        mesh.SetUVs(1, uv2s);         // <-- UV2 set
+        mesh.SetTriangles(triangles, 0);
+
         mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
+
         GetComponent<MeshFilter>().mesh = mesh;
 
-        // 1. Objenin üzerinde MeshCollider var mı kontrol et, yoksa ekle
+        // Collider
         MeshCollider collider = GetComponent<MeshCollider>();
-        if (collider == null) 
-        {
+        if (collider == null)
             collider = gameObject.AddComponent<MeshCollider>();
-        }
 
-        // 2. Oluşturduğumuz pürüzsüz mesh'i collider'a ata
+        collider.sharedMesh = null;   // bazen refresh için iyi olur
         collider.sharedMesh = mesh;
-        
-        // 3. Önemli: Katmanı kodla da garantiye alalım
+
+        // Layer
         gameObject.layer = LayerMask.NameToLayer("Track");
     }
 
@@ -91,6 +117,7 @@ public class TrackGenerator : MonoBehaviour
     Vector3 GetCatmullRomPosition(float t, int index)
     {
         int count = controlPoints.Count;
+
         Vector3 p0 = controlPoints[Mathf.Max(index - 1, 0)];
         Vector3 p1 = controlPoints[index];
         Vector3 p2 = controlPoints[Mathf.Min(index + 1, count - 1)];
