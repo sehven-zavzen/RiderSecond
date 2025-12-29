@@ -1,0 +1,56 @@
+{
+  "levelSettings": {
+    "songName": "Synthwave Escape",
+    "bpm": 124,
+    "speed": 20.0,
+    "segmentLength": 20.0
+  },
+  "segments": [
+    {
+      "z": 0.0,
+      "curve": 0.0,
+      "type": "Straight",
+      "notes": []
+    },
+    {
+      "z": 20.0,
+      "curve": 5.0,
+      "type": "Curved",
+      "notes": [
+        { "lane": 0, "type": "Normal" },
+        { "lane": 2, "type": "Normal" }
+      ]
+    },
+    {
+      "z": 40.0,
+      "curve": 12.5,
+      "type": "Curved",
+      "notes": [
+        { "lane": 1, "type": "Gold" }
+      ]
+    },
+    {
+      "z": 60.0,
+      "curve": -8.0,
+      "type": "S-Curve",
+      "notes": [
+        { "lane": 0, "type": "Obstacle" }
+      ]
+    },
+    {
+      "z": 80.0,
+      "curve": 0.0,
+      "type": "Tunnel",
+      "notes": [
+        { "lane": 1, "type": "Normal" },
+        { "lane": 2, "type": "Normal" }
+      ]
+    },
+    {
+      "z": 100.0,
+      "curve": 0.0,
+      "type": "Final",
+      "notes": []
+    }
+  ]
+}

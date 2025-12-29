@@ -410,7 +410,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 805a5ab10cebad841ab30d49d5310555, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  laneDistance: 2
+  laneDistance: 5
   moveSpeed: 25
 --- !u!114 &394114298
 MonoBehaviour:
@@ -425,8 +425,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShaderGlobalParam
   playerTransform: {fileID: 394114296}
-  flattenDistance: 41.4
-  flattenLookAhead: 15
+  flattenDistance: 24
+  flattenLookAhead: 10
   flattenYToZero: 1
 --- !u!1 &410087039
 GameObject:
@@ -587,7 +587,7 @@ MonoBehaviour:
   trackPrefab: {fileID: 5571707517626650711, guid: 27b635f5e77611d40a9244b72c7cecef, type: 3}
   initialTrackCount: 5
   trackLength: 70
-  moveSpeed: 5
+  moveSpeed: 20
 --- !u!4 &446339683
 Transform:
   m_ObjectHideFlags: 0
